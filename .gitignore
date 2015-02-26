@@ -33,3 +33,10 @@ nosetests.xml
 .mr.developer.cfg
 .project
 .pydevproject
+
+charmm
+phenol_cgenff.par
+phenol_cgenff_mtp_0.01.lpun
+phenol_cgenff_mtp_0.01.top
+phenol_gas.pdb
+
