@@ -61,6 +61,8 @@ parser.add_argument('--dual', dest='dual', type=str, nargs=3,
                   + 'Provide RESNAMEs of MOL1, MOL2, and DUAL. ')
 parser.add_argument('--pep', dest='peptide', action='store_true', 
                   help='Adjusts CRYSTAL options for peptide solute')
+parser.add_argument('--generate', dest='generateOnly', action='store_true', default=False,
+                  help='Only generate files but do not run simulations.')                  
 
 args = parser.parse_args()
 # Initialize variables for dual topology
@@ -985,28 +987,29 @@ if args.ti in ['mtp','vdw']:
   scaleChargesInTop('%.6f' % 0.00)
   scaleChargesInTop('%.6f' % 1.00)
 
-simCounter = 0
-# Main loop. Calculates all lambda windows.
-allDone = allTIDone()
-while allDone is False:
-  # Don't wait if we've gotten new analysis back.
-  newAnalysis = False
-  for simIndex in range(len(lambdaVals['done'])):
-    if lambdaVals['done'][simIndex] is False:
-      status, simCounter = runLambdaInterval(index=simIndex, nstep=args.nsteps, 
-        nequil=args.nequil, simCounter=simCounter)
-      if status == True:
-        newAnalysis = True
-  if args.submit ==  True:
-    print "# Submitted all simulations."
-    print "# Remote directory: %s. " % (rmtChm.getDir())
-    print "# jobID: %s" % getSubName(0)[:5]
-    print "# Exiting"
-    exit(0)
-  if newAnalysis == False:
-    # Sleep for a while
-    time.sleep(60)
+if args.generateOnly == True
+  simCounter = 0
+  # Main loop. Calculates all lambda windows.
   allDone = allTIDone()
+  while allDone is False:
+    # Don't wait if we've gotten new analysis back.
+    newAnalysis = False
+    for simIndex in range(len(lambdaVals['done'])):
+      if lambdaVals['done'][simIndex] is False:
+        status, simCounter = runLambdaInterval(index=simIndex, nstep=args.nsteps, 
+          nequil=args.nequil, simCounter=simCounter)
+        if status == True:
+          newAnalysis = True
+    if args.submit ==  True:
+      print "# Submitted all simulations."
+      print "# Remote directory: %s. " % (rmtChm.getDir())
+      print "# jobID: %s" % getSubName(0)[:5]
+      print "# Exiting"
+      exit(0)
+    if newAnalysis == False:
+      # Sleep for a while
+      time.sleep(60)
+    allDone = allTIDone()
 
 # Print results
 totalEnergy = 0.0
