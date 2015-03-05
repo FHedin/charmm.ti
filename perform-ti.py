@@ -758,6 +758,13 @@ def runLambdaInterval(index, nstep, nequil, simCounter):
               str(args.ti) + '.out'
   inpFiles.append(inpFile)
   outFiles.append(outFile)
+  
+  if args.generateOnly == True:
+    print "The user asked for files generation only but no submission ; no run now ..."
+    saveToFile(inpScript, inpFile)
+    lambdaVals['done'][index] = True
+    return True,simCounter+1
+
   mtpAddDG = 0.0
   if args.remote:
     # Leave the routine if the simulation and analysis is complete
@@ -987,43 +994,43 @@ if args.ti in ['mtp','vdw']:
   scaleChargesInTop('%.6f' % 0.00)
   scaleChargesInTop('%.6f' % 1.00)
 
-if args.generateOnly == True
-  simCounter = 0
-  # Main loop. Calculates all lambda windows.
+simCounter = 0
+# Main loop. Calculates all lambda windows.
+allDone = allTIDone()
+while allDone is False:
+  # Don't wait if we've gotten new analysis back.
+  newAnalysis = False
+  for simIndex in range(len(lambdaVals['done'])):
+    if lambdaVals['done'][simIndex] is False:
+      status, simCounter = runLambdaInterval(index=simIndex, nstep=args.nsteps, 
+        nequil=args.nequil, simCounter=simCounter)
+      if status == True:
+        newAnalysis = True
+  if args.submit ==  True:
+    print "# Submitted all simulations."
+    print "# Remote directory: %s. " % (rmtChm.getDir())
+    print "# jobID: %s" % getSubName(0)[:5]
+    print "# Exiting"
+    exit(0)
+  if newAnalysis == False:
+    # Sleep for a while
+    time.sleep(60)
   allDone = allTIDone()
-  while allDone is False:
-    # Don't wait if we've gotten new analysis back.
-    newAnalysis = False
-    for simIndex in range(len(lambdaVals['done'])):
-      if lambdaVals['done'][simIndex] is False:
-        status, simCounter = runLambdaInterval(index=simIndex, nstep=args.nsteps, 
-          nequil=args.nequil, simCounter=simCounter)
-        if status == True:
-          newAnalysis = True
-    if args.submit ==  True:
-      print "# Submitted all simulations."
-      print "# Remote directory: %s. " % (rmtChm.getDir())
-      print "# jobID: %s" % getSubName(0)[:5]
-      print "# Exiting"
-      exit(0)
-    if newAnalysis == False:
-      # Sleep for a while
-      time.sleep(60)
-    allDone = allTIDone()
 
-# Print results
-totalEnergy = 0.0
-print "# lambda_i  lambda_f    deltaG"
-for i in range(len(lambdaVals['initial'])):
-  print "  %.6f - %.6f: %9.5f" % (lambdaVals['initial'][i], lambdaVals['final'][i],
-    lambdaVals['energy'][i])
-  totalEnergy += lambdaVals['energy'][i]
-print "##############################"
-print "# %.6f - %.6f: %9.5f kcal/mol" % (lambdaVals['initial'][0], 
-  lambdaVals['final'][-1], totalEnergy)
+if args.generateOnly == False:
+    # Print results
+    totalEnergy = 0.0
+    print "# lambda_i  lambda_f    deltaG"
+    for i in range(len(lambdaVals['initial'])):
+      print "  %.6f - %.6f: %9.5f" % (lambdaVals['initial'][i], lambdaVals['final'][i],
+        lambdaVals['energy'][i])
+      totalEnergy += lambdaVals['energy'][i]
+    print "##############################"
+    print "# %.6f - %.6f: %9.5f kcal/mol" % (lambdaVals['initial'][0], 
+      lambdaVals['final'][-1], totalEnergy)
 
-# Remove remote directory
-if args.remote:
-  rmtChm.delRemoteSubDir()
+    # Remove remote directory
+    if args.remote:
+      rmtChm.delRemoteSubDir()
 
 print "# Normal termination"
