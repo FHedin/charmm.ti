@@ -760,7 +760,9 @@ def runLambdaInterval(index, nstep, nequil, simCounter):
   outFiles.append(outFile)
   
   if args.generateOnly == True:
-    print "The user asked for files generation only but no submission ; no run now ..."
+#    print "The user asked for files generation only but no submission ; no run now ...\n"
+    print '\n'
+    print inpFile
     saveToFile(inpScript, inpFile)
     lambdaVals['done'][index] = True
     return True,simCounter+1
