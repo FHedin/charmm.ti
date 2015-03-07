@@ -61,6 +61,8 @@ parser.add_argument('--dual', dest='dual', type=str, nargs=3,
                   + 'Provide RESNAMEs of MOL1, MOL2, and DUAL. ')
 parser.add_argument('--pep', dest='peptide', action='store_true', 
                   help='Adjusts CRYSTAL options for peptide solute')
+parser.add_argument('--generate', dest='generateOnly', action='store_true', default=False,
+                  help='Only generate files but do not run simulations.')                  
 
 args = parser.parse_args()
 # Initialize variables for dual topology
@@ -756,6 +758,15 @@ def runLambdaInterval(index, nstep, nequil, simCounter):
               str(args.ti) + '.out'
   inpFiles.append(inpFile)
   outFiles.append(outFile)
+  
+  if args.generateOnly == True:
+#    print "The user asked for files generation only but no submission ; no run now ...\n"
+    print '\n'
+    print inpFile
+    saveToFile(inpScript, inpFile)
+    lambdaVals['done'][index] = True
+    return True,simCounter+1
+
   mtpAddDG = 0.0
   if args.remote:
     # Leave the routine if the simulation and analysis is complete
@@ -1008,19 +1019,20 @@ while allDone is False:
     time.sleep(60)
   allDone = allTIDone()
 
-# Print results
-totalEnergy = 0.0
-print "# lambda_i  lambda_f    deltaG"
-for i in range(len(lambdaVals['initial'])):
-  print "  %.6f - %.6f: %9.5f" % (lambdaVals['initial'][i], lambdaVals['final'][i],
-    lambdaVals['energy'][i])
-  totalEnergy += lambdaVals['energy'][i]
-print "##############################"
-print "# %.6f - %.6f: %9.5f kcal/mol" % (lambdaVals['initial'][0], 
-  lambdaVals['final'][-1], totalEnergy)
+if args.generateOnly == False:
+    # Print results
+    totalEnergy = 0.0
+    print "# lambda_i  lambda_f    deltaG"
+    for i in range(len(lambdaVals['initial'])):
+      print "  %.6f - %.6f: %9.5f" % (lambdaVals['initial'][i], lambdaVals['final'][i],
+        lambdaVals['energy'][i])
+      totalEnergy += lambdaVals['energy'][i]
+    print "##############################"
+    print "# %.6f - %.6f: %9.5f kcal/mol" % (lambdaVals['initial'][0], 
+      lambdaVals['final'][-1], totalEnergy)
 
-# Remove remote directory
-if args.remote:
-  rmtChm.delRemoteSubDir()
+    # Remove remote directory
+    if args.remote:
+      rmtChm.delRemoteSubDir()
 
 print "# Normal termination"
