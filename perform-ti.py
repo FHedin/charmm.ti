@@ -337,7 +337,7 @@ CLOSE UNIT 40
     noPSSPSnippet = "NOPSSP -"
   procSnippet = \
 '''DYNA LEAP STRT NSTEP %s TIMESTEP 0.001 -
-  NTRFRQ 100  ECHECK 150.0 -
+  NTRFRQ 100 -
   IPRFRQ 0 INBFRQ -1 IMGFRQ 250 -
   LSTART %s  LAMBDA %s  LSTOP %s  PSTART  %s -
   PSTOP  %s  PSLOW LINCR %s %s -''' % (str(nstep), str('%.6f' % lambdai), 
@@ -495,7 +495,7 @@ def extractWindowEnergy(outFile):
     exit(1)
   for i in range(len(s)):
     line = s[i].split()
-    if 'PERTRES>' in line and 'EPRTOT=' in line and '' not in line:
+    if 'PERTRES>' in line and 'EPRTOT=' in line:
       return float(line[7])
   print "Error. Can't find PERTRES statement in output file",outFile
   exit(1)
